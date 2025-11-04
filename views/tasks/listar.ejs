@@ -2,72 +2,104 @@
 <html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
-    <title>Minhas Tarefas</title>
+    <title>Meus Serviços - Gestor de Serviços</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   </head>
   <body class="bg-gray-900 text-white">
-    <div class="min-h-screen flex flex-col justify-center items-center px-4">
-      <h2 class="text-4xl font-extrabold text-indigo-400 mb-10 drop-shadow-lg">
-        Minhas Tarefas
-      </h2>
+    <div class="min-h-screen flex flex-col justify-center items-center px-4 py-8">
+      <div class="flex flex-col items-center mb-10">
+        <img src="/trator.png" alt="Ícone" class="w-20 h-20 mb-4">
+        <h2 class="text-2xl font-bold text-teal-400">Meus Serviços</h2>
+      </div>
 
-      <div class="bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-3xl transition-all duration-300 hover:scale-[1.01]">
+      <div class="bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-4xl">
         <div class="flex justify-between mb-6">
           <a
             href="/tasks/new"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md px-4 py-2 transition"
+            class="bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-md px-4 py-2 transition border-2 border-teal-400"
           >
-            Nova Tarefa
+            Novo Serviço
           </a>
-          <a
-            href="/logout"
-            class="text-red-400 font-semibold hover:underline transition"
-          >
-            Sair
-          </a>
+          <div class="flex gap-4">
+            <a
+              href="/dashboard"
+              class="text-teal-400 font-semibold hover:underline transition"
+            >
+              Painel
+            </a>
+            <a
+              href="/logout"
+              class="text-red-400 font-semibold hover:underline transition"
+            >
+              Sair
+            </a>
+          </div>
         </div>
 
-        <ul class="flex flex-col gap-4">
-          <% tasks.forEach(function(task) { %>
-          <li
-            class="border border-gray-700 rounded-lg px-4 py-3 flex flex-col md:flex-row md:items-center justify-between bg-gray-700"
-          >
-            <div>
-              <strong class="text-lg text-indigo-300"><%= task.title %></strong>
-              <span class="ml-2 text-gray-300"><%= task.description %></span>
-              <% if (task.completed) { %>
-              <span class="ml-2 text-green-400 font-semibold">[Completada]</span>
-              <% } %>
-            </div>
-            <div class="flex gap-2 mt-2 md:mt-0">
-              <% if (!task.completed) { %>
-              <form action="/tasks/complete/<%= task.id %>" method="POST">
-                <button
-                  type="submit"
-                  class="bg-green-600 hover:bg-green-700 text-white rounded-md px-3 py-1 font-semibold transition"
-                >
-                  Completar
-                </button>
-              </form>
-              <% } %>
-              <a
-                href="/tasks/edit/<%= task.id %>"
-                class="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-3 py-1 font-semibold transition"
-              >
-                Editar
-              </a>
-              <form action="/tasks/delete/<%= task.id %>" method="POST">
-                <button
-                  type="submit"
-                  class="bg-red-600 hover:bg-red-700 text-white rounded-md px-3 py-1 font-semibold transition"
-                >
-                  Excluir
-                </button>
-              </form>
-            </div>
-          </li>
-          <% }) %>
-        </ul>
+        <% if (tasks.length === 0) { %>
+          <p class="text-gray-400 text-center py-8">Nenhum serviço cadastrado ainda.</p>
+        <% } else { %>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-gray-700">
+                <th class="text-left py-3 px-4 text-teal-300">Cliente</th>
+                <th class="text-left py-3 px-4 text-teal-300">Serviço</th>
+                <th class="text-left py-3 px-4 text-teal-300">Valor/Hora</th>
+                <th class="text-left py-3 px-4 text-teal-300">Localidade</th>
+                <th class="text-center py-3 px-4 text-teal-300">Status</th>
+                <th class="text-center py-3 px-4 text-teal-300">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% tasks.forEach(function(task) { %>
+              <tr class="border-b border-gray-700 hover:bg-gray-700">
+                <td class="py-3 px-4 text-white"><%= task.client ? task.client.name : '-' %></td>
+                <td class="py-3 px-4 text-white"><%= task.serviceName %></td>
+                <td class="py-3 px-4 text-gray-300">R$ <%= parseFloat(task.hourlyRate || 0).toFixed(2) %></td>
+                <td class="py-3 px-4 text-gray-300"><%= task.location || '-' %></td>
+                <td class="py-3 px-4 text-center">
+                  <% if (task.completed) { %>
+                    <span class="text-green-400 font-semibold">Concluído</span>
+                  <% } else { %>
+                    <span class="text-yellow-400 font-semibold">Pendente</span>
+                  <% } %>
+                </td>
+                <td class="py-3 px-4">
+                  <div class="flex gap-2 justify-center flex-wrap">
+                    <% if (!task.completed) { %>
+                    <form action="/tasks/complete/<%= task.id %>" method="POST" style="display: inline;">
+                      <button
+                        type="submit"
+                        class="bg-green-600 hover:bg-green-700 text-white rounded-md px-3 py-1 font-semibold transition border-2 border-green-400 text-sm"
+                      >
+                        Concluir
+                      </button>
+                    </form>
+                    <% } %>
+                    <a
+                      href="/tasks/edit/<%= task.id %>"
+                      class="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-3 py-1 font-semibold transition border-2 border-blue-400 text-sm"
+                    >
+                      Editar
+                    </a>
+                    <form action="/tasks/delete/<%= task.id %>" method="POST" style="display: inline;">
+                      <button
+                        type="submit"
+                        class="bg-red-600 hover:bg-red-700 text-white rounded-md px-3 py-1 font-semibold transition border-2 border-red-400 text-sm"
+                        onclick="return confirm('Tem certeza que deseja excluir este serviço?')"
+                      >
+                        Excluir
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <% } %>
       </div>
     </div>
   </body>

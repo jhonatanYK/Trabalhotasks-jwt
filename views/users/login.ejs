@@ -2,14 +2,15 @@
 <html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
-    <title>Login - Listar Tarefas</title>
+    <title>Login - Gestor de Serviços</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   </head>
   <body class="bg-gray-900 text-white">
     <div class="min-h-screen flex flex-col justify-center items-center px-4">
-      <h2 class="text-4xl font-extrabold text-indigo-400 mb-10 drop-shadow-lg">
-        Login
-      </h2>
+      <div class="flex flex-col items-center mb-10">
+        <img src="/trator.png" alt="Ícone" class="w-20 h-20 mb-4">
+        <h2 class="text-2xl font-bold text-teal-400">Gestor de Serviços</h2>
+      </div>
 
       <div class="bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md">
         <% if (typeof error !== 'undefined' && error) { %>
@@ -18,28 +19,28 @@
 
         <form action="/login" method="POST" class="flex flex-col gap-4">
           <div>
-            <label for="username" class="block font-semibold text-indigo-300 mb-1">Usuário:</label>
+            <label for="username" class="block font-semibold text-teal-300 mb-1">E-mail:</label>
             <input
               type="text"
               name="username"
               required
-              class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
 
           <div>
-            <label for="password" class="block font-semibold text-indigo-300 mb-1">Senha:</label>
+            <label for="password" class="block font-semibold text-teal-300 mb-1">Senha:</label>
             <input
               type="password"
               name="password"
               required
-              class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
 
           <button
             type="submit"
-            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition duration-200"
+            class="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-lg transition duration-200 border-2 border-teal-400"
           >
             Entrar
           </button>
@@ -47,9 +48,7 @@
 
         <p class="mt-4 text-sm text-gray-300 text-center">
           Não tem conta?
-          <a href="/register" class="text-indigo-400 hover:underline font-medium">
-            Registre-se
-          </a>
+          <a href="/register" class="text-teal-400 hover:underline font-medium">Cadastrar-se</a>
         </p>
       </div>
     </div>

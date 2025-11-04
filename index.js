@@ -7,7 +7,11 @@ const userController = require('./controllers/userController');
 const app = express();
 const port = process.env.PORT || 3000;
 
-db.sync();
+// Sincroniza o banco de dados (force: true vai recriar as tabelas)
+// ATENÇÃO: Isso vai apagar todos os dados! Use apenas em desenvolvimento
+db.sync({ force: true }).then(() => {
+  console.log('Banco de dados sincronizado!');
+});
 
 
 app.set('view engine', 'ejs');
@@ -25,8 +29,8 @@ app.get('/register', userController.renderRegister);
 app.post('/register', userController.register);
 app.get('/logout', userController.logout);
 
-app.use('/tasks', (req, res, next) => {
-  // Autenticação via cookie JWT
+// Middleware de autenticação
+const authCheck = (req, res, next) => {
   const token = req.cookies.token;
   if (!token) return res.redirect('/login');
   require('jsonwebtoken').verify(token, process.env.SECRET_KEY, (err, decoded) => {
@@ -34,7 +38,16 @@ app.use('/tasks', (req, res, next) => {
     req.user = decoded;
     next();
   });
-}, require('./routes/taskRoutes'));
+};
+
+// Dashboard
+app.get('/dashboard', authCheck, (req, res) => res.render('dashboard'));
+
+// Rotas de clientes
+app.use('/clients', authCheck, require('./routes/clientRoutes'));
+
+// Rotas de tarefas
+app.use('/tasks', authCheck, require('./routes/taskRoutes'));
 
 // Rotas API (opcional)
 app.use('/api/user', require('./routes/userRoutes'));

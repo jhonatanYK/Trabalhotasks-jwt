@@ -27,7 +27,7 @@ const login = async (req, res) => {
     }
     const token = generateToken(user);
     res.cookie('token', token, { httpOnly: true });
-    res.redirect('/tasks');
+    res.redirect('/dashboard');
   } catch (error) {
     res.render('users/login', { error: 'Erro ao fazer login!' });
   }
