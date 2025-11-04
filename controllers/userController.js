@@ -2,6 +2,10 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const {generateToken} = require('../middlewares/authMiddleware')
 const renderLogin = (req, res) => {
+  // Limpa o cache ao exibir a página de login
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.render('users/login');
 };
 
@@ -11,7 +15,31 @@ const renderRegister = (req, res) => {
 
 const logout = (req, res) => {
   res.clearCookie('token');
-  res.redirect('/login');
+  // Limpa o cache e previne navegação com botão voltar
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  
+  // Renderiza uma página intermediária que limpa o histórico
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Saindo...</title>
+      <script>
+        // Limpa o histórico e redireciona
+        window.history.pushState(null, null, window.location.href);
+        window.onpopstate = function() {
+          window.history.forward();
+        };
+        window.location.replace('/login');
+      </script>
+    </head>
+    <body>
+      <p>Saindo do sistema...</p>
+    </body>
+    </html>
+  `);
 };
 
 const login = async (req, res) => {

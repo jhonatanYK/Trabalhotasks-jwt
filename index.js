@@ -7,11 +7,8 @@ const userController = require('./controllers/userController');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Sincroniza o banco de dados (force: true vai recriar as tabelas)
-// ATENÇÃO: Isso vai apagar todos os dados! Use apenas em desenvolvimento
-db.sync({ force: true }).then(() => {
-  console.log('Banco de dados sincronizado!');
-});
+// Sincroniza o banco de dados
+db.sync();
 
 
 app.set('view engine', 'ejs');
@@ -20,6 +17,14 @@ app.use(express.static(__dirname + '/public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
+
+// Middleware para desabilitar cache em páginas protegidas
+const noCache = (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+};
 
 // Rotas web
 app.get('/', (req, res) => res.render('index'));
@@ -40,14 +45,25 @@ const authCheck = (req, res, next) => {
   });
 };
 
-// Dashboard
-app.get('/dashboard', authCheck, (req, res) => res.render('dashboard'));
+// Dashboard (com noCache)
+app.get('/dashboard', noCache, authCheck, (req, res) => res.render('dashboard'));
 
-// Rotas de clientes
-app.use('/clients', authCheck, require('./routes/clientRoutes'));
+// Rotas de clientes (com noCache)
+app.use('/clients', noCache, authCheck, require('./routes/clientRoutes'));
 
-// Rotas de tarefas
-app.use('/tasks', authCheck, require('./routes/taskRoutes'));
+// Rotas de tarefas (com noCache)
+app.use('/tasks', noCache, authCheck, require('./routes/taskRoutes'));
+
+// API para verificar autenticação (usado pelo JavaScript do frontend)
+app.get('/api/check-auth', (req, res) => {
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ authenticated: false });
+  
+  require('jsonwebtoken').verify(token, process.env.SECRET_KEY, (err, decoded) => {
+    if (err) return res.status(401).json({ authenticated: false });
+    res.json({ authenticated: true });
+  });
+});
 
 // Rotas API (opcional)
 app.use('/api/user', require('./routes/userRoutes'));
