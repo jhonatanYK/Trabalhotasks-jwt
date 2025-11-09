@@ -1,6 +1,7 @@
 const Task = require('../models/Task');
 const User = require('../models/User');
 const Client = require('../models/Client');
+const Machine = require('../models/Machine');
 
 
 // Renderiza lista de serviços
@@ -8,7 +9,10 @@ const renderList = async (req, res) => {
   try {
     const tasks = await Task.findAll({ 
       where: { user_id: req.user.id },
-      include: [{ model: Client, as: 'client' }],
+      include: [
+        { model: Client, as: 'client' },
+        { model: Machine, as: 'machine' }
+      ],
       order: [['createdAt', 'DESC']]
     });
     res.render('tasks/listar', { tasks });
@@ -21,7 +25,8 @@ const renderList = async (req, res) => {
 const renderNew = async (req, res) => {
   try {
     const clients = await Client.findAll({ order: [['name', 'ASC']] });
-    res.render('tasks/nova', { clients });
+    const machines = await Machine.findAll({ order: [['name', 'ASC']] });
+    res.render('tasks/nova', { clients, machines });
   } catch (error) {
     res.status(500).send({ error: 'Erro ao carregar formulário' });
   }
@@ -30,11 +35,15 @@ const renderNew = async (req, res) => {
 // Cria novo serviço
 const create = async (req, res) => {
   try {
-    const { client_id, serviceName, hourlyRate, location, description } = req.body;
+    const { client_id, machine_id, serviceName, startTime, endTime, hoursWorked, totalAmount, location, description } = req.body;
     await Task.create({ 
       client_id, 
+      machine_id,
       serviceName, 
-      hourlyRate, 
+      startTime,
+      endTime,
+      hoursWorked,
+      totalAmount,
       location, 
       description, 
       user_id: req.user.id 
@@ -50,12 +59,16 @@ const renderEdit = async (req, res) => {
   try {
     const task = await Task.findOne({ 
       where: { id: req.params.id, user_id: req.user.id },
-      include: [{ model: Client, as: 'client' }]
+      include: [
+        { model: Client, as: 'client' },
+        { model: Machine, as: 'machine' }
+      ]
     });
     if (!task) return res.status(404).send('Serviço não encontrado');
     
     const clients = await Client.findAll({ order: [['name', 'ASC']] });
-    res.render('tasks/editar', { task, clients });
+    const machines = await Machine.findAll({ order: [['name', 'ASC']] });
+    res.render('tasks/editar', { task, clients, machines });
   } catch (error) {
     res.status(500).send({ error: 'Erro ao buscar serviço' });
   }
@@ -64,9 +77,9 @@ const renderEdit = async (req, res) => {
 // Edita serviço
 const edit = async (req, res) => {
   try {
-    const { client_id, serviceName, hourlyRate, location, description } = req.body;
+    const { client_id, machine_id, serviceName, startTime, endTime, hoursWorked, totalAmount, location, description } = req.body;
     await Task.update(
-      { client_id, serviceName, hourlyRate, location, description }, 
+      { client_id, machine_id, serviceName, startTime, endTime, hoursWorked, totalAmount, location, description }, 
       { where: { id: req.params.id, user_id: req.user.id } }
     );
     res.redirect('/tasks');

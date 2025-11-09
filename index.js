@@ -51,6 +51,9 @@ app.get('/dashboard', noCache, authCheck, (req, res) => res.render('dashboard'))
 // Rotas de clientes (com noCache)
 app.use('/clients', noCache, authCheck, require('./routes/clientRoutes'));
 
+// Rotas de máquinas (com noCache)
+app.use('/machines', noCache, authCheck, require('./routes/machineRoutes'));
+
 // Rotas de tarefas (com noCache)
 app.use('/tasks', noCache, authCheck, require('./routes/taskRoutes'));
 
