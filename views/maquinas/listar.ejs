@@ -18,7 +18,7 @@
       
       <div class="mb-6 flex justify-end">
         <a
-          href="/machines/new"
+          href="/maquinas/new"
           class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-lg border-2 border-teal-400 inline-flex items-center gap-2 shadow-lg hover:shadow-xl transition duration-200"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,7 +54,7 @@
               <td class="py-2 px-4 border-b border-gray-600">
                 <div class="flex gap-2">
                   <a
-                    href="/machines/edit/<%= machine.id %>"
+                    href="/maquinas/edit/<%= machine.id %>"
                     class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg border-2 border-blue-500 inline-flex items-center gap-1 shadow-md hover:shadow-lg transition duration-200"
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,7 +62,7 @@
                     </svg>
                     Editar
                   </a>
-                  <form action="/machines/delete/<%= machine.id %>" method="POST" class="inline-block">
+                  <form action="/maquinas/delete/<%= machine.id %>" method="POST" class="inline-block">
                     <button
                       type="submit"
                       class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg border-2 border-red-500 inline-flex items-center gap-1 shadow-md hover:shadow-lg transition duration-200"
@@ -94,17 +94,27 @@
     </div>
 
     <script>
-      // Verifica autenticação ao carregar a página
-      window.addEventListener('pageshow', async function(event) {
-        try {
-          const response = await fetch('/api/check-auth');
-          if (!response.ok) {
-            window.location.replace('/users/login');
+      // Verifica se o usuário ainda está autenticado
+      (function() {
+        // Desabilita o botão voltar após logout - verifica se página veio do cache
+        window.addEventListener('pageshow', function(event) {
+          if (event.persisted || (window.performance && window.performance.navigation.type == 2)) {
+            // Página foi restaurada do cache - verifica autenticação
+            fetch('/api/check-auth', {
+              method: 'GET',
+              credentials: 'include'
+            })
+            .then(response => {
+              if (!response.ok) {
+                window.location.replace('/login');
+              }
+            })
+            .catch(() => {
+              window.location.replace('/login');
+            });
           }
-        } catch (error) {
-          window.location.replace('/users/login');
-        }
-      });
+        });
+      })();
     </script>
   </body>
 </html>

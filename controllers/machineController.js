@@ -2,7 +2,7 @@ const Machine = require('../models/Machine');
 
 // Renderizar formulário de nova máquina
 exports.renderNewForm = async (req, res) => {
-  res.render('machines/nova');
+  res.render('maquinas/nova');
 };
 
 // Criar nova máquina
@@ -16,7 +16,7 @@ exports.create = async (req, res) => {
       plate,
       notes,
     });
-    res.redirect('/machines');
+    res.redirect('/maquinas');
   } catch (error) {
     console.error('Erro ao criar máquina:', error);
     res.status(500).send('Erro ao criar máquina');
@@ -29,7 +29,7 @@ exports.list = async (req, res) => {
     const machines = await Machine.findAll({
       order: [['createdAt', 'DESC']],
     });
-    res.render('machines/listar', { machines });
+    res.render('maquinas/listar', { machines });
   } catch (error) {
     console.error('Erro ao listar máquinas:', error);
     res.status(500).send('Erro ao listar máquinas');
@@ -43,7 +43,7 @@ exports.renderEditForm = async (req, res) => {
     if (!machine) {
       return res.status(404).send('Máquina não encontrada');
     }
-    res.render('machines/editar', { machine });
+    res.render('maquinas/editar', { machine });
   } catch (error) {
     console.error('Erro ao buscar máquina:', error);
     res.status(500).send('Erro ao buscar máquina');
@@ -58,7 +58,7 @@ exports.update = async (req, res) => {
       { name, type, hourlyRate, plate, notes },
       { where: { id: req.params.id } }
     );
-    res.redirect('/machines');
+    res.redirect('/maquinas');
   } catch (error) {
     console.error('Erro ao atualizar máquina:', error);
     res.status(500).send('Erro ao atualizar máquina');
@@ -69,7 +69,7 @@ exports.update = async (req, res) => {
 exports.delete = async (req, res) => {
   try {
     await Machine.destroy({ where: { id: req.params.id } });
-    res.redirect('/machines');
+    res.redirect('/maquinas');
   } catch (error) {
     console.error('Erro ao deletar máquina:', error);
     res.status(500).send('Erro ao deletar máquina');
