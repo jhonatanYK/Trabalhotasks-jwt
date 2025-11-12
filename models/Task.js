@@ -1,28 +1,11 @@
 const db = require('../db');
 const User = require('./User');
 const Client = require('./Client');
-const Machine = require('./Machine');
 
 const Task = db.define('task', {
   serviceName: {
     type: db.Sequelize.STRING,
     allowNull: false,
-  },
-  startTime: {
-    type: db.Sequelize.STRING,
-    allowNull: true,
-  },
-  endTime: {
-    type: db.Sequelize.STRING,
-    allowNull: true,
-  },
-  hoursWorked: {
-    type: db.Sequelize.DECIMAL(10, 2),
-    allowNull: true,
-  },
-  totalAmount: {
-    type: db.Sequelize.DECIMAL(10, 2),
-    allowNull: true,
   },
   location: {
     type: db.Sequelize.STRING,
@@ -42,13 +25,22 @@ const Task = db.define('task', {
     references: {
       model: 'users',
       key: 'id'
-    }
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
   },
+}, {
+  indexes: [
+    {
+      fields: ['user_id']
+    },
+    {
+      fields: ['user_id', 'client_id']
+    }
+  ]
 });
 
 Task.belongsTo(User, { foreignKey: 'user_id' });
 Task.belongsTo(Client, { foreignKey: 'client_id', as: 'client' });
-// Relacionamento com máquina antiga mantido para compatibilidade
-Task.belongsTo(Machine, { foreignKey: 'machine_id', as: 'machine' });
 
 module.exports = Task;

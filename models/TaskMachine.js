@@ -14,7 +14,9 @@ const TaskMachine = db.define('task_machine', {
     references: {
       model: 'tasks',
       key: 'id'
-    }
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
   },
   machine_id: {
     type: db.Sequelize.INTEGER,
@@ -22,7 +24,9 @@ const TaskMachine = db.define('task_machine', {
     references: {
       model: 'Machines',
       key: 'id'
-    }
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
   },
   startTime: {
     type: db.Sequelize.STRING,
@@ -49,7 +53,19 @@ const TaskMachine = db.define('task_machine', {
   }
 }, {
   tableName: 'task_machines',
-  timestamps: true
+  timestamps: true,
+  indexes: [
+    {
+      fields: ['task_id']
+    },
+    {
+      fields: ['machine_id']
+    },
+    {
+      unique: true,
+      fields: ['task_id', 'machine_id']
+    }
+  ]
 });
 
 module.exports = TaskMachine;

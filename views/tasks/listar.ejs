@@ -81,13 +81,6 @@
                         <% } %>
                       </div>
                     <% }); %>
-                  <% } else if (task.startTime) { %>
-                    Inicial: <%= task.startTime %>
-                    <% if (task.endTime) { %>
-                      <br>Final: <%= task.endTime %>
-                    <% } else { %>
-                      <br><span class="text-yellow-400 text-xs">⏳ Em andamento</span>
-                    <% } %>
                   <% } else { %>
                     -
                   <% } %>
@@ -102,8 +95,6 @@
                           totalHours += parseFloat(tm.hoursWorked);
                         }
                       });
-                    } else if (task.hoursWorked) {
-                      totalHours = parseFloat(task.hoursWorked);
                     }
                   %>
                   <% if (totalHours > 0) { %>
@@ -122,8 +113,6 @@
                           totalAmount += parseFloat(tm.totalAmount);
                         }
                       });
-                    } else if (task.totalAmount) {
-                      totalAmount = parseFloat(task.totalAmount);
                     }
                   %>
                   <% if (totalAmount > 0) { %>
@@ -142,11 +131,11 @@
                           allFinished = false;
                         }
                       });
-                    } else if (!task.endTime) {
+                    } else {
                       allFinished = false;
                     }
                   %>
-                  <% if (allFinished && (task.machines?.length > 0 || task.endTime)) { %>
+                  <% if (allFinished && task.machines?.length > 0) { %>
                     <span class="text-green-400 font-semibold">✓ Finalizado</span>
                   <% } else { %>
                     <span class="text-yellow-400 font-semibold">⏳ Em Andamento</span>

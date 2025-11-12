@@ -26,8 +26,20 @@ const Machine = db.define('Machine', {
     references: {
       model: 'users',
       key: 'id'
-    }
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
   },
+}, {
+  indexes: [
+    {
+      fields: ['user_id']
+    },
+    {
+      unique: true,
+      fields: ['user_id', 'name']
+    }
+  ]
 });
 
 module.exports = Machine;

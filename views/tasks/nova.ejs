@@ -15,15 +15,45 @@
       </div>
 
       <div class="bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md border border-teal-600">
+        
+        <!-- Mensagem de Erro/Aviso -->
+        <% if (typeof error !== 'undefined' && error) { %>
+          <div class="mb-6 p-4 bg-yellow-900 border-l-4 border-yellow-500 text-yellow-200 rounded">
+            <div class="flex items-start">
+              <svg class="w-6 h-6 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+              </svg>
+              <div>
+                <p class="font-semibold mb-2"><%= error %></p>
+                <div class="text-sm space-y-1">
+                  <% if (error.includes('cliente')) { %>
+                    <a href="/clients/new" class="inline-block bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded mt-2 transition">
+                      ➕ Cadastrar Cliente
+                    </a>
+                  <% } %>
+                  <% if (error.includes('máquina')) { %>
+                    <a href="/maquinas/new" class="inline-block bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded mt-2 transition">
+                      ➕ Cadastrar Máquina
+                    </a>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% } %>
+        
         <form action="/tasks/new" method="POST" class="flex flex-col gap-4">
           
           <label for="client_id" class="font-semibold text-teal-300">Selecione um Cliente*</label>
           <select
             name="client_id"
             required
+            <%= (typeof error !== 'undefined' && error) ? 'disabled' : '' %>
             class="bg-gray-700 text-gray-400 border border-gray-600 rounded-md px-3 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
-            <option value="" disabled selected>Selecione um Cliente*</option>
+            <option value="" disabled selected>
+              <%= clients.length === 0 ? 'Nenhum cliente cadastrado' : 'Selecione um Cliente*' %>
+            </option>
             <% clients.forEach(function(client) { %>
               <option value="<%= client.id %>"><%= client.name %></option>
             <% }) %>
@@ -34,6 +64,7 @@
             name="serviceName"
             placeholder="Descreva o serviço realizado..."
             required
+            <%= (typeof error !== 'undefined' && error) ? 'disabled' : '' %>
             rows="3"
             class="bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-500 resize-y"
           ></textarea>
@@ -59,22 +90,19 @@
             </button>
           </div>
 
-          <!-- Horímetro Inicial não é mais usado aqui, será por máquina -->
-          <input type="hidden" name="endTime" id="endTime" value="">
-          <input type="hidden" name="hoursWorked" id="hoursWorked" value="0">
-          <input type="hidden" name="totalAmount" id="totalAmount" value="0">
-
           <label for="location" class="font-semibold text-teal-300">Endereço / Localidade</label>
           <input
             type="text"
             name="location"
             placeholder="Endereço / Localidade"
+            <%= (typeof error !== 'undefined' && error) ? 'disabled' : '' %>
             class="bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-500"
           />
 
           <button
             type="submit"
-            class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 border-2 border-teal-400 inline-flex items-center justify-center gap-2 shadow-lg hover:shadow-xl mt-2"
+            <%= (typeof error !== 'undefined' && error) ? 'disabled' : '' %>
+            class="w-full <%= (typeof error !== 'undefined' && error) ? 'bg-gray-600 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700' %> text-white font-bold py-3 px-6 rounded-lg transition duration-200 border-2 border-teal-400 inline-flex items-center justify-center gap-2 shadow-lg hover:shadow-xl mt-2"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -108,18 +136,25 @@
     </div>
 
     <script>
-      // Dados das máquinas disponíveis
-      const availableMachines = <%- JSON.stringify(machines.map(m => ({ 
-        id: m.id, 
-        name: m.name, 
-        type: m.type, 
-        hourlyRate: m.hourlyRate 
-      }))) %>;
+      // Verifica se há dados disponíveis
+      const hasData = <%= (typeof error === 'undefined' || !error) ? 'true' : 'false' %>;
       
-      let machineCounter = 0;
+      if (!hasData) {
+        // Se não há dados, não executa o script de máquinas
+        console.log('Aguardando cadastro de clientes e máquinas');
+      } else {
+        // Dados das máquinas disponíveis
+        const availableMachines = <%- JSON.stringify(machines.map(m => ({ 
+          id: m.id, 
+          name: m.name, 
+          type: m.type, 
+          hourlyRate: m.hourlyRate 
+        }))) %>;
+        
+        let machineCounter = 0;
 
-      // Função para adicionar uma máquina
-      function addMachineField() {
+        // Função para adicionar uma máquina
+        function addMachineField() {
         machineCounter++;
         const container = document.getElementById('machines-container');
         
@@ -220,6 +255,8 @@
 
       // Adiciona a primeira máquina automaticamente
       addMachineField();
+      
+      } // Fecha o bloco if (hasData)
 
       // Verifica se o usuário ainda está autenticado
       (function() {

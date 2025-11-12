@@ -14,9 +14,10 @@ require('./models/TaskMachine');
 
 // Sincroniza o banco de dados
 db.sync().then(() => {
-  console.log('Banco de dados sincronizado!');
+  console.log('✅ Banco de dados sincronizado!');
+  console.log('📊 Sistema otimizado com isolamento completo por usuário');
 }).catch(err => {
-  console.error('Erro ao sincronizar banco de dados:', err);
+  console.error('❌ Erro ao sincronizar banco de dados:', err);
 });
 
 
@@ -50,6 +51,7 @@ const authCheck = (req, res, next) => {
   require('jsonwebtoken').verify(token, process.env.SECRET_KEY, (err, decoded) => {
     if (err) return res.redirect('/login');
     req.user = decoded;
+    req.userId = decoded.id; // Adiciona req.userId para facilitar o uso
     next();
   });
 };

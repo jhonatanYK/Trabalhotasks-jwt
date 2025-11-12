@@ -12,8 +12,7 @@ const renderList = async (req, res) => {
     const tasks = await Task.findAll({ 
       where: { user_id: req.userId },
       include: [
-        { model: Client, as: 'client' },
-        { model: Machine, as: 'machine' } // Compatibilidade com serviços antigos
+        { model: Client, as: 'client' }
       ],
       order: [['createdAt', 'DESC']]
     });
@@ -31,7 +30,12 @@ const renderList = async (req, res) => {
       
       taskData.machines = [];
       for (const tm of taskMachines) {
-        const machine = await Machine.findByPk(tm.machine_id);
+        const machine = await Machine.findOne({
+          where: {
+            id: tm.machine_id,
+            user_id: req.userId
+          }
+        });
         if (machine) {
           const machineData = machine.toJSON();
           machineData.task_machine = {
@@ -67,8 +71,27 @@ const renderNew = async (req, res) => {
       where: { user_id: req.userId },
       order: [['name', 'ASC']] 
     });
+    
+    // Verifica se há clientes e máquinas cadastrados
+    if (clients.length === 0 || machines.length === 0) {
+      let message = '';
+      if (clients.length === 0 && machines.length === 0) {
+        message = 'Você precisa cadastrar pelo menos um cliente e uma máquina antes de criar um serviço.';
+      } else if (clients.length === 0) {
+        message = 'Você precisa cadastrar pelo menos um cliente antes de criar um serviço.';
+      } else {
+        message = 'Você precisa cadastrar pelo menos uma máquina antes de criar um serviço.';
+      }
+      return res.render('tasks/nova', { 
+        clients, 
+        machines, 
+        error: message 
+      });
+    }
+    
     res.render('tasks/nova', { clients, machines });
   } catch (error) {
+    console.error('Erro ao carregar formulário:', error);
     res.status(500).send({ error: 'Erro ao carregar formulário' });
   }
 };
@@ -84,11 +107,7 @@ const create = async (req, res) => {
       serviceName, 
       location, 
       description, 
-      user_id: req.userId,
-      startTime: null,
-      endTime: null,
-      hoursWorked: 0,
-      totalAmount: 0
+      user_id: req.userId
     });
 
     // Adiciona as máquinas ao serviço
@@ -127,8 +146,7 @@ const renderEdit = async (req, res) => {
     const task = await Task.findOne({ 
       where: { id: req.params.id, user_id: req.userId },
       include: [
-        { model: Client, as: 'client' },
-        { model: Machine, as: 'machine' } // Mantém compatibilidade com serviços antigos
+        { model: Client, as: 'client' }
       ]
     });
     
@@ -145,7 +163,12 @@ const renderEdit = async (req, res) => {
     // Adiciona as máquinas ao objeto task
     taskData.machines = [];
     for (const tm of taskMachines) {
-      const machine = await Machine.findByPk(tm.machine_id);
+      const machine = await Machine.findOne({
+        where: {
+          id: tm.machine_id,
+          user_id: req.userId
+        }
+      });
       if (machine) {
         const machineData = machine.toJSON();
         machineData.task_machine = {
@@ -160,8 +183,14 @@ const renderEdit = async (req, res) => {
       }
     }
     
-    const clients = await Client.findAll({ order: [['name', 'ASC']] });
-    const machines = await Machine.findAll({ order: [['name', 'ASC']] });
+    const clients = await Client.findAll({ 
+      where: { user_id: req.userId },
+      order: [['name', 'ASC']] 
+    });
+    const machines = await Machine.findAll({ 
+      where: { user_id: req.userId },
+      order: [['name', 'ASC']] 
+    });
     
     res.render('tasks/editar', { task: taskData, clients, machines });
   } catch (error) {
