@@ -3,6 +3,7 @@ const Client = require('../models/Client');
 const renderList = async (req, res) => {
   try {
     const clients = await Client.findAll({
+      where: { user_id: req.userId },
       order: [['createdAt', 'DESC']]
     });
     res.render('clients/listar', { clients });
@@ -18,7 +19,14 @@ const renderNew = (req, res) => {
 const createClient = async (req, res) => {
   try {
     const { name, email, phone, address, notes } = req.body;
-    await Client.create({ name, email, phone, address, notes });
+    await Client.create({ 
+      name, 
+      email, 
+      phone, 
+      address, 
+      notes,
+      user_id: req.userId 
+    });
     res.redirect('/clients');
   } catch (error) {
     res.status(500).send('Erro ao criar cliente');
@@ -27,7 +35,12 @@ const createClient = async (req, res) => {
 
 const renderEdit = async (req, res) => {
   try {
-    const client = await Client.findByPk(req.params.id);
+    const client = await Client.findOne({
+      where: { 
+        id: req.params.id,
+        user_id: req.userId 
+      }
+    });
     if (!client) {
       return res.status(404).send('Cliente não encontrado');
     }
@@ -42,7 +55,10 @@ const updateClient = async (req, res) => {
     const { name, email, phone, address, notes } = req.body;
     await Client.update(
       { name, email, phone, address, notes },
-      { where: { id: req.params.id } }
+      { where: { 
+        id: req.params.id,
+        user_id: req.userId 
+      } }
     );
     res.redirect('/clients');
   } catch (error) {
@@ -52,10 +68,42 @@ const updateClient = async (req, res) => {
 
 const deleteClient = async (req, res) => {
   try {
-    await Client.destroy({ where: { id: req.params.id } });
+    const Task = require('../models/Task');
+    const TaskMachine = require('../models/TaskMachine');
+    
+    // Busca todos os serviços deste cliente (apenas do usuário logado)
+    const tasks = await Task.findAll({ 
+      where: { 
+        client_id: req.params.id,
+        user_id: req.userId 
+      } 
+    });
+    
+    // Para cada serviço, deleta as máquinas associadas
+    for (const task of tasks) {
+      await TaskMachine.destroy({ where: { task_id: task.id } });
+    }
+    
+    // Deleta os serviços do cliente
+    await Task.destroy({ 
+      where: { 
+        client_id: req.params.id,
+        user_id: req.userId 
+      } 
+    });
+    
+    // Finalmente deleta o cliente (apenas se for do usuário logado)
+    await Client.destroy({ 
+      where: { 
+        id: req.params.id,
+        user_id: req.userId 
+      } 
+    });
+    
     res.redirect('/clients');
   } catch (error) {
-    res.status(500).send('Erro ao deletar cliente');
+    console.error('Erro ao deletar cliente:', error);
+    res.status(500).send('Erro ao deletar cliente: ' + error.message);
   }
 };
 

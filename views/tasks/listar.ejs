@@ -46,15 +46,42 @@
               <% tasks.forEach(function(task) { %>
               <tr class="border-b border-gray-700 hover:bg-gray-700">
                 <td class="py-3 px-4 text-white"><%= task.client ? task.client.name : '-' %></td>
-                <td class="py-3 px-4 text-white"><%= task.serviceName %></td>
+                <td class="py-3 px-4 text-white max-w-xs">
+                  <div class="whitespace-pre-wrap break-words"><%= task.serviceName %></div>
+                </td>
                 <td class="py-3 px-4 text-gray-300">
-                  <%= task.machine ? task.machine.name : '-' %>
-                  <% if (task.machine) { %>
+                  <% if (task.machines && task.machines.length > 0) { %>
+                    <% task.machines.forEach(function(machine, index) { %>
+                      <div class="<%= index > 0 ? 'mt-2 pt-2 border-t border-gray-600' : '' %>">
+                        <%= machine.name %>
+                        <span class="text-xs text-gray-400">(<%= machine.type %>)</span>
+                      </div>
+                    <% }); %>
+                  <% } else if (task.machine) { %>
+                    <%= task.machine.name %>
                     <span class="text-xs text-gray-400">(<%= task.machine.type %>)</span>
+                  <% } else { %>
+                    -
                   <% } %>
                 </td>
                 <td class="py-3 px-4 text-gray-300">
-                  <% if (task.startTime) { %>
+                  <% if (task.machines && task.machines.length > 0) { %>
+                    <% task.machines.forEach(function(machine, index) { %>
+                      <div class="<%= index > 0 ? 'mt-2 pt-2 border-t border-gray-600' : '' %> text-xs">
+                        <% const tm = machine.task_machine; %>
+                        <% if (tm && tm.startTime) { %>
+                          Inicial: <%= tm.startTime %>
+                          <% if (tm.endTime) { %>
+                            <br>Final: <%= tm.endTime %>
+                          <% } else { %>
+                            <br><span class="text-yellow-400">⏳ Em andamento</span>
+                          <% } %>
+                        <% } else { %>
+                          -
+                        <% } %>
+                      </div>
+                    <% }); %>
+                  <% } else if (task.startTime) { %>
                     Inicial: <%= task.startTime %>
                     <% if (task.endTime) { %>
                       <br>Final: <%= task.endTime %>
@@ -66,21 +93,60 @@
                   <% } %>
                 </td>
                 <td class="py-3 px-4 text-gray-300">
-                  <% if (task.hoursWorked) { %>
-                    <%= parseFloat(task.hoursWorked).toFixed(1).replace('.', ',') %>h
+                  <% 
+                    let totalHours = 0;
+                    if (task.machines && task.machines.length > 0) {
+                      task.machines.forEach(function(machine) {
+                        const tm = machine.task_machine;
+                        if (tm && tm.hoursWorked) {
+                          totalHours += parseFloat(tm.hoursWorked);
+                        }
+                      });
+                    } else if (task.hoursWorked) {
+                      totalHours = parseFloat(task.hoursWorked);
+                    }
+                  %>
+                  <% if (totalHours > 0) { %>
+                    <%= totalHours.toFixed(1).replace('.', ',') %>h
                   <% } else { %>
                     <span class="text-gray-500">-</span>
                   <% } %>
                 </td>
                 <td class="py-3 px-4 font-semibold">
-                  <% if (task.totalAmount) { %>
-                    <span class="text-green-400">R$ <%= parseFloat(task.totalAmount).toFixed(2).replace('.', ',') %></span>
+                  <% 
+                    let totalAmount = 0;
+                    if (task.machines && task.machines.length > 0) {
+                      task.machines.forEach(function(machine) {
+                        const tm = machine.task_machine;
+                        if (tm && tm.totalAmount) {
+                          totalAmount += parseFloat(tm.totalAmount);
+                        }
+                      });
+                    } else if (task.totalAmount) {
+                      totalAmount = parseFloat(task.totalAmount);
+                    }
+                  %>
+                  <% if (totalAmount > 0) { %>
+                    <span class="text-green-400">R$ <%= totalAmount.toFixed(2).replace('.', ',') %></span>
                   <% } else { %>
                     <span class="text-gray-500">-</span>
                   <% } %>
                 </td>
                 <td class="py-3 px-4 text-center">
-                  <% if (task.endTime) { %>
+                  <% 
+                    let allFinished = true;
+                    if (task.machines && task.machines.length > 0) {
+                      task.machines.forEach(function(machine) {
+                        const tm = machine.task_machine;
+                        if (!tm || !tm.endTime) {
+                          allFinished = false;
+                        }
+                      });
+                    } else if (!task.endTime) {
+                      allFinished = false;
+                    }
+                  %>
+                  <% if (allFinished && (task.machines?.length > 0 || task.endTime)) { %>
                     <span class="text-green-400 font-semibold">✓ Finalizado</span>
                   <% } else { %>
                     <span class="text-yellow-400 font-semibold">⏳ Em Andamento</span>
@@ -88,15 +154,18 @@
                 </td>
                 <td class="py-3 px-4">
                   <div class="flex gap-2 justify-center flex-wrap">
-                    <a
-                      href="/tasks/edit/<%= task.id %>"
-                      class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 font-bold transition border-2 border-blue-500 inline-flex items-center gap-1 shadow-md hover:shadow-lg"
-                    >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                      </svg>
-                      Editar
-                    </a>
+                    <% if (!allFinished) { %>
+                      <!-- Botão Finalizar (quando ainda não foi finalizado) -->
+                      <a
+                        href="/tasks/edit/<%= task.id %>"
+                        class="bg-green-600 hover:bg-green-700 text-white rounded-lg px-4 py-2 font-bold transition border-2 border-green-500 inline-flex items-center gap-1 shadow-md hover:shadow-lg"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Finalizar
+                      </a>
+                    <% } %>
                     <form action="/tasks/delete/<%= task.id %>" method="POST" style="display: inline;">
                       <button
                         type="submit"

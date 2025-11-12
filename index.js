@@ -7,8 +7,17 @@ const userController = require('./controllers/userController');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Carrega os modelos e relacionamentos
+require('./models/Task');
+require('./models/Machine');
+require('./models/TaskMachine');
+
 // Sincroniza o banco de dados
-db.sync();
+db.sync().then(() => {
+  console.log('Banco de dados sincronizado!');
+}).catch(err => {
+  console.error('Erro ao sincronizar banco de dados:', err);
+});
 
 
 app.set('view engine', 'ejs');
@@ -52,7 +61,7 @@ app.get('/dashboard', noCache, authCheck, (req, res) => res.render('dashboard'))
 app.use('/clients', noCache, authCheck, require('./routes/clientRoutes'));
 
 // Rotas de máquinas (com noCache)
-app.use('/machines', noCache, authCheck, require('./routes/machineRoutes'));
+app.use('/maquinas', noCache, authCheck, require('./routes/machineRoutes'));
 
 // Rotas de tarefas (com noCache)
 app.use('/tasks', noCache, authCheck, require('./routes/taskRoutes'));

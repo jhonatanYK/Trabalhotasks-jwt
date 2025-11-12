@@ -21,6 +21,14 @@ const Client = db.define('client', {
     type: db.Sequelize.TEXT,
     allowNull: true,
   },
+  user_id: {
+    type: db.Sequelize.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
+  },
 });
 
 module.exports = Client;

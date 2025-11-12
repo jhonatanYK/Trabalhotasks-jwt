@@ -36,10 +36,19 @@ const Task = db.define('task', {
     type: db.Sequelize.BOOLEAN,
     defaultValue: false,
   },
+  user_id: {
+    type: db.Sequelize.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
+  },
 });
 
 Task.belongsTo(User, { foreignKey: 'user_id' });
 Task.belongsTo(Client, { foreignKey: 'client_id', as: 'client' });
+// Relacionamento com máquina antiga mantido para compatibilidade
 Task.belongsTo(Machine, { foreignKey: 'machine_id', as: 'machine' });
 
 module.exports = Task;
