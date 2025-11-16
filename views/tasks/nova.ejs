@@ -6,6 +6,8 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   </head>
   <body class="bg-gray-900 text-white">
+    <%- include('../partials/notifications') %>
+    
     <div class="min-h-screen flex flex-col justify-center items-center px-4 py-8">
       
       <!-- Título e Ícone Centralizados -->
@@ -155,106 +157,106 @@
 
         // Função para adicionar uma máquina
         function addMachineField() {
-        machineCounter++;
-        const container = document.getElementById('machines-container');
-        
-        const machineDiv = document.createElement('div');
-        machineDiv.className = 'bg-gray-600 p-4 rounded-lg space-y-3 relative';
-        machineDiv.id = `machine-${machineCounter}`;
-        
-        machineDiv.innerHTML = `
-          <button 
-            type="button" 
-            onclick="removeMachine(${machineCounter})"
-            class="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 transition"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-
-          <div>
-            <label class="block text-sm font-semibold text-teal-200 mb-1">Máquina ${machineCounter}*</label>
-            <select 
-              name="machine_ids[]" 
-              required
-              class="machine-select w-full bg-gray-700 text-white border border-gray-500 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
-            >
-              <option value="" disabled selected>Selecione uma máquina</option>
-              ${availableMachines.map(m => `
-                <option value="${m.id}" data-rate="${m.hourlyRate}">
-                  ${m.name} - ${m.type} (R$ ${parseFloat(m.hourlyRate).toFixed(2).replace('.', ',')}/h)
-                </option>
-              `).join('')}
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-sm font-semibold text-teal-200 mb-1">Horímetro Inicial*</label>
-            <input 
-              type="number" 
-              step="0.1" 
-              name="start_times[]" 
-              placeholder="Ex: 1234.5" 
-              required
-              class="w-full bg-gray-700 text-white border border-gray-500 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
-            />
-            <p class="text-xs text-gray-400 mt-1">Horímetro no início do serviço</p>
-          </div>
-
-          <input type="hidden" name="hourly_rates[]" class="hourly-rate-input" value="0">
-        `;
-        
-        container.appendChild(machineDiv);
-
-        // Adiciona listener para atualizar o hourlyRate quando selecionar máquina
-        const select = machineDiv.querySelector('.machine-select');
-        const hourlyRateInput = machineDiv.querySelector('.hourly-rate-input');
-        
-        select.addEventListener('change', function() {
-          const selectedOption = this.options[this.selectedIndex];
-          const rate = selectedOption.getAttribute('data-rate');
-          hourlyRateInput.value = rate || 0;
-          validateDuplicateMachines.call(this);
-        });
-      }
-
-      // Função para remover uma máquina
-      function removeMachine(id) {
-        const machineDiv = document.getElementById(`machine-${id}`);
-        if (machineDiv) {
-          // Verifica se é a última máquina
+          machineCounter++;
           const container = document.getElementById('machines-container');
-          if (container.children.length > 1) {
-            machineDiv.remove();
-          } else {
-            alert('É necessário ter pelo menos uma máquina no serviço!');
+          
+          const machineDiv = document.createElement('div');
+          machineDiv.className = 'bg-gray-600 p-4 rounded-lg space-y-3 relative';
+          machineDiv.id = `machine-${machineCounter}`;
+          
+          machineDiv.innerHTML = `
+            <button 
+              type="button" 
+              onclick="removeMachine(${machineCounter})"
+              class="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 transition"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+
+            <div>
+              <label class="block text-sm font-semibold text-teal-200 mb-1">Máquina ${machineCounter}*</label>
+              <select 
+                name="machine_ids[]" 
+                required
+                class="machine-select w-full bg-gray-700 text-white border border-gray-500 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              >
+                <option value="" disabled selected>Selecione uma máquina</option>
+                ${availableMachines.map(m => `
+                  <option value="${m.id}" data-rate="${m.hourlyRate}">
+                    ${m.name} - ${m.type} (R$ ${parseFloat(m.hourlyRate).toFixed(2).replace('.', ',')}/h)
+                  </option>
+                `).join('')}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-teal-200 mb-1">Horímetro Inicial*</label>
+              <input 
+                type="number" 
+                step="0.1" 
+                name="start_times[]" 
+                placeholder="Ex: 1234.5" 
+                required
+                class="w-full bg-gray-700 text-white border border-gray-500 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+              <p class="text-xs text-gray-400 mt-1">Horímetro no início do serviço</p>
+            </div>
+
+            <input type="hidden" name="hourly_rates[]" class="hourly-rate-input" value="0">
+          `;
+          
+          container.appendChild(machineDiv);
+
+          // Adiciona listener para atualizar o hourlyRate quando selecionar máquina
+          const select = machineDiv.querySelector('.machine-select');
+          const hourlyRateInput = machineDiv.querySelector('.hourly-rate-input');
+          
+          select.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const rate = selectedOption.getAttribute('data-rate');
+            hourlyRateInput.value = rate || 0;
+            validateDuplicateMachines.call(this);
+          });
+        }
+
+        // Função para remover uma máquina
+        function removeMachine(id) {
+          const machineDiv = document.getElementById(`machine-${id}`);
+          if (machineDiv) {
+            // Verifica se é a última máquina
+            const container = document.getElementById('machines-container');
+            if (container.children.length > 1) {
+              machineDiv.remove();
+            } else {
+              showNotification('É necessário ter pelo menos uma máquina no serviço!', 'warning');
+            }
           }
         }
-      }
 
-      // Validar máquinas duplicadas
-      function validateDuplicateMachines() {
-        const selects = document.querySelectorAll('#machines-container .machine-select');
-        const selectedIds = Array.from(selects)
-          .map(s => s.value)
-          .filter(v => v !== '');
-        
-        const duplicates = selectedIds.filter((id, index) => selectedIds.indexOf(id) !== index);
-        
-        if (duplicates.length > 0) {
-          alert('Você não pode adicionar a mesma máquina duas vezes!');
-          this.value = '';
-          return false;
+        // Validar máquinas duplicadas
+        function validateDuplicateMachines() {
+          const selects = document.querySelectorAll('#machines-container .machine-select');
+          const selectedIds = Array.from(selects)
+            .map(s => s.value)
+            .filter(v => v !== '');
+          
+          const duplicates = selectedIds.filter((id, index) => selectedIds.indexOf(id) !== index);
+          
+          if (duplicates.length > 0) {
+            showNotification('Você não pode adicionar a mesma máquina duas vezes!', 'warning');
+            this.value = '';
+            return false;
+          }
+          return true;
         }
-        return true;
-      }
 
-      // Botão para adicionar máquina
-      document.getElementById('add-machine-btn').addEventListener('click', addMachineField);
+        // Botão para adicionar máquina
+        document.getElementById('add-machine-btn').addEventListener('click', addMachineField);
 
-      // Adiciona a primeira máquina automaticamente
-      addMachineField();
+        // Adiciona a primeira máquina automaticamente
+        addMachineField();
       
       } // Fecha o bloco if (hasData)
 

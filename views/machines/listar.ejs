@@ -7,6 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
   </head>
   <body class="bg-gray-900 text-white">
+    <%- include('../partials/notifications') %>
+    
     <div class="max-w-6xl mx-auto mt-10 p-8 bg-gray-800 rounded-lg shadow-lg border border-teal-600">
       <!-- Cabeçalho com ícone -->
       <div class="flex items-center justify-center mb-6">
@@ -62,11 +64,11 @@
                     </svg>
                     Editar
                   </a>
-                  <form action="/machines/delete/<%= machine.id %>" method="POST" class="inline-block">
+                  <form id="delete-form-<%= machine.id %>" action="/machines/delete/<%= machine.id %>" method="POST" class="inline-block">
                     <button
-                      type="submit"
+                      type="button"
                       class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg border-2 border-red-500 inline-flex items-center gap-1 shadow-md hover:shadow-lg transition duration-200"
-                      onclick="return confirm('Tem certeza que deseja deletar esta máquina?')"
+                      onclick="handleDelete(<%= machine.id %>, 'máquina')"
                     >
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -115,6 +117,14 @@
           }
         });
       })();
+
+      // Função para lidar com exclusão
+      async function handleDelete(id, type) {
+        const confirmed = await customConfirm(`Tem certeza que deseja deletar esta ${type}?`);
+        if (confirmed) {
+          document.getElementById(`delete-form-${id}`).submit();
+        }
+      }
     </script>
   </body>
 </html>
