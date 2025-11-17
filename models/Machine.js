@@ -17,9 +17,6 @@ const Machine = db.define('Machine', {
   plate: {
     type: DataTypes.STRING, // Placa do veículo
   },
-  notes: {
-    type: DataTypes.TEXT,
-  },
   user_id: {
     type: DataTypes.INTEGER,
     allowNull: false,

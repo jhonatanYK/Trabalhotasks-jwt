@@ -8,13 +8,12 @@ exports.renderNewForm = async (req, res) => {
 // Criar nova máquina
 exports.create = async (req, res) => {
   try {
-    const { name, type, hourlyRate, plate, notes } = req.body;
+    const { name, type, hourlyRate, plate } = req.body;
     await Machine.create({
       name,
       type,
       hourlyRate,
       plate,
-      notes,
       user_id: req.userId,
     });
     res.redirect('/machines');
@@ -60,9 +59,9 @@ exports.renderEditForm = async (req, res) => {
 // Atualizar máquina
 exports.update = async (req, res) => {
   try {
-    const { name, type, hourlyRate, plate, notes } = req.body;
+    const { name, type, hourlyRate, plate } = req.body;
     await Machine.update(
-      { name, type, hourlyRate, plate, notes },
+      { name, type, hourlyRate, plate },
       { where: { 
         id: req.params.id,
         user_id: req.userId 
